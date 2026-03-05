@@ -1,0 +1,29 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}{% if mode == 'register' %}Register{% else %}Sign In{% endif %} — NeuroMood{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-16 px-4 sm:px-6 lg:px-8">
+    <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-8 shadow-xl">
+        <h1 class="text-3xl font-bold text-center mb-8">
+            {% if mode == 'register' %}Create Account{% else %}Welcome Back{% endif %}
+        </h1>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-lg font-medium transition mt-4">
+                {% if mode == 'register' %}Register{% else %}Sign In{% endif %}
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-slate-400">
+            {% if mode == 'register' %}
+                Already have an account? <a href="{% url 'login' %}" class="text-indigo-400 hover:underline">Sign in</a>
+            {% else %}
+                New here? <a href="{% url 'register' %}" class="text-indigo-400 hover:underline">Create account</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

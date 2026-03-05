@@ -1,0 +1,49 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}NeuroMood — Understand Your Emotions{% endblock %}
+
+{% block content %}
+<div class="relative isolate pt-14">
+    <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl">
+        <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-600 to-purple-600 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
+    </div>
+
+    <div class="py-24 sm:py-32 lg:pb-40">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-3xl text-center">
+                <h1 class="text-5xl font-bold tracking-tight text-white sm:text-6xl">
+                    Read Your Emotions<br>from Brain Signals
+                </h1>
+                <p class="mt-6 text-xl leading-8 text-slate-300">
+                    Upload EEG data → AI detects valence, arousal, emotion + gives personalized insights & chat.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <a href="{% url 'register' %}" class="rounded-lg bg-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+                        Start Free Analysis
+                    </a>
+                    <a href="{% url 'about' %}" class="text-lg font-semibold leading-6 text-indigo-400 hover:text-indigo-300">
+                        How it works →
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-3">
+                <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4">🧠</div>
+                    <h3 class="text-xl font-semibold mb-3">EEG → Emotion</h3>
+                    <p class="text-slate-400">Valence / Arousal / Dominance + 6+ discrete emotions</p>
+                </div>
+                <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4">💬</div>
+                    <h3 class="text-xl font-semibold mb-3">AI Chat & Guidance</h3>
+                    <p class="text-slate-400">Ask follow-ups, get coping strategies & explanations</p>
+                </div>
+                <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4">📈</div>
+                    <h3 class="text-xl font-semibold mb-3">Trends & Journal</h3>
+                    <p class="text-slate-400">Track emotional patterns over weeks/months</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}Upload EEG — NeuroMood{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-white">Upload EEG File</h1>
+        <p class="mt-4 text-lg text-slate-400">.csv, .txt, .npy — 14 channels preferred</p>
+    </div>
+
+    <div x-data="{
+        fileName: '',
+        isUploading: false,
+        setFile(event) {
+            const files = event.target?.files || event.dataTransfer?.files;
+            const file = files?.[0];
+            this.fileName = file ? file.name : '';
+        }
+    }" 
+         class="bg-navy-800/70 border border-navy-700 rounded-2xl p-8 shadow-2xl">
+
+        <form method="post" enctype="multipart/form-data"
+              @submit="isUploading = true"
+              x-on:submit="if (!fileName) { $event.preventDefault(); alert('Please select or drop a file'); return false; }">
+
+            {% csrf_token %}
+
+            <div x-on:dragover.prevent 
+                 x-on:dragenter.prevent="$el.classList.add('border-indigo-500', 'bg-navy-900/60')"
+                 x-on:dragleave.prevent="$el.classList.remove('border-indigo-500', 'bg-navy-900/60')"
+                 x-on:drop.prevent="$refs.fileInput.files = $event.dataTransfer.files; setFile($event)">
+
+                <label class="block text-lg font-medium mb-3 cursor-pointer">
+                    EEG Recording File
+
+                    <!-- The input is now inside the label → accessibility fixed -->
+                    <input 
+                        x-ref="fileInput" 
+                        type="file" 
+                        name="eeg_file" 
+                        class="hidden" 
+                        accept=".csv,.txt,.npy" 
+                        @change="setFile($event)" 
+                        required
+                    >
+
+                    <div class="mt-2 flex justify-center rounded-xl border-2 border-dashed border-navy-600 px-6 py-16 text-center transition hover:border-indigo-500 hover:bg-navy-900/40">
+                        <div>
+                            <svg class="mx-auto h-14 w-14 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <div class="mt-6">
+                                <span class="text-indigo-400 font-medium">Click to browse</span>
+                                <span class="text-slate-400"> or drag & drop</span>
+                            </div>
+                            <p class="mt-2 text-sm text-slate-500">CSV, TXT, NPY • up to 50 MB</p>
+
+                            <template x-if="fileName">
+                                <div class="mt-6 text-indigo-300 font-medium truncate max-w-md mx-auto">
+                                    → <span x-text="fileName"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-8">
+                <label class="block text-lg font-medium mb-2">Optional notes / context</label>
+                <textarea name="notes" rows="4" 
+                          class="w-full rounded-lg bg-navy-900 border border-navy-700 px-4 py-3 focus:ring-indigo-500 focus:border-indigo-500" 
+                          placeholder="Example: evening session after work stress..."></textarea>
+            </div>
+
+            <div class="pt-10">
+                <button type="submit" 
+                        :disabled="isUploading || !fileName"
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-4 px-8 rounded-xl transition text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                    <span x-show="!isUploading">Analyze Emotion →</span>
+                    <span x-show="isUploading" class="flex items-center gap-3">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <p class="mt-8 text-center text-slate-500 text-sm">
+        Data is processed securely • Raw EEG not stored long-term
+    </p>
+</div>
+{% endblock %}

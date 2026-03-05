@@ -1,0 +1,143 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}Dashboard — NeuroMood{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-white mb-2">Dashboard</h1>
+    <p class="text-slate-400 mb-10">Overview of your analyses & emotional trends</p>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Total Sessions</h3>
+            <p class="text-5xl font-bold text-indigo-400">{{ total_sessions|default:0 }}</p>
+        </div>
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Distress Detected</h3>
+            <p class="text-5xl font-bold text-red-400">{{ distress_count|default:0 }}</p>
+        </div>
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Positive Valence</h3>
+            <p class="text-5xl font-bold text-emerald-400">{{ positive_count|default:0 }}</p>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Chart -->
+        <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-6">
+            <h2 class="text-xl font-semibold mb-6">Emotion Distribution</h2>
+            <canvas id="emotionChart" class="max-h-72 w-full"></canvas>
+        </div>
+
+        <!-- Recent Sessions -->
+        <div class="bg-navy-800/60 border border-navy-700 rounded-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-navy-700">
+                <h2 class="text-xl font-semibold">Recent Analyses</h2>
+            </div>
+            <div class="divide-y divide-navy-700" id="sessions-list">
+                {% for session in sessions %}
+                <div class="px-6 py-5 hover:bg-navy-700/30 transition flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">{{ session.file_name }}</p>
+                        <p class="text-sm text-slate-500">{{ session.created_at|date:"d M Y • H:i" }}</p>
+                    </div>
+                    <div class="flex gap-5">
+                        <a href="{% url 'results' session.id %}" class="text-indigo-400 hover:text-indigo-300">View</a>
+                        <button hx-post="{% url 'api_delete_session' session.id %}"
+                                hx-confirm="Delete this session permanently?"
+                                hx-swap="outerHTML"
+                                hx-target="closest div"
+                                class="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="px-6 py-12 text-center text-slate-500">
+                    No sessions yet. <a href="{% url 'upload' %}" class="text-indigo-400 hover:underline">Upload your first EEG</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}  <!-- This is the ONLY closing tag for content -->
+
+{% block extra_js %}
+<script id="emotion-data" type="application/json">
+    {{ emotions|json_script:"emotion-data" }}
+</script>
+
+<div id="chart-message" class="text-center text-slate-400 py-8 hidden">
+    No emotion data available yet. Complete some analyses to see the chart.
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dataEl = document.getElementById('emotion-data');
+    const msgEl  = document.getElementById('chart-message');
+    const canvas = document.getElementById('emotionChart');
+
+    if (!dataEl || !canvas) {
+        console.error('Required elements missing');
+        if (msgEl) msgEl.classList.remove('hidden');
+        return;
+    }
+
+    // Use innerHTML instead of textContent — cleaner for script tags
+    let jsonText = dataEl.innerHTML.trim();
+
+    // Extra safety: remove anything that looks like tags
+    jsonText = jsonText.replace(/<[^>]+>/g, '').trim();
+
+    let stats;
+    try {
+        stats = JSON.parse(jsonText);
+        console.log('Successfully parsed emotion stats:', stats);
+    } catch (err) {
+        console.error('JSON parse failed:', err);
+        console.log('Cleaned JSON text tried:', jsonText);
+        console.log('Original innerHTML (first 300 chars):', dataEl.innerHTML.substring(0, 300));
+        if (msgEl) {
+            msgEl.textContent = 'Error loading chart data — please check server logs';
+            msgEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (!Array.isArray(stats) || stats.length === 0) {
+        if (msgEl) msgEl.classList.remove('hidden');
+        return;
+    }
+
+    // Chart should now render
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: stats.map(item => item.emotion || 'Unknown'),
+            datasets: [{
+                data: stats.map(item => Number(item.count) || 0),
+                backgroundColor: [
+                    '#6366f1', '#a855f7', '#ec4899', '#f43f5e',
+                    '#f59e0b', '#10b981', '#64748b', '#60a5fa'
+                ],
+                borderColor: '#1e293b',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#cbd5e1', font: { size: 13 } }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
+{% endblock %}

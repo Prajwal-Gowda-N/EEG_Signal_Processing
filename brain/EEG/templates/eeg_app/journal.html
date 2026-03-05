@@ -1,0 +1,118 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}Journal — NeuroMood{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-white mb-2">Emotion Journal</h1>
+    <p class="text-slate-400 mb-10">Your emotional history & patterns</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Total Entries</h3>
+            <p class="text-5xl font-bold text-indigo-400">{{ total|default:0 }}</p>
+        </div>
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Distress Count</h3>
+            <p class="text-5xl font-bold text-red-400">{{ distress_count|default:0 }}</p>
+        </div>
+        <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6 text-center">
+            <h3 class="text-lg font-medium text-slate-300 mb-1">Positive Moments</h3>
+            <p class="text-5xl font-bold text-emerald-400">{{ positive_count|default:0 }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Emotion Breakdown Chart (using dashboard-style extraction) -->
+        <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-6">
+            <h2 class="text-xl font-semibold mb-6">Emotion Breakdown</h2>
+            <div style="height:300px;">
+    <canvas id="journalEmotionChart"></canvas>
+</div>
+            <div id="no-journal-data" class="text-center text-slate-400 py-8 hidden">
+                No emotion data available yet. Complete some analyses to see breakdown.
+            </div>
+        </div>
+
+        <!-- Recent Entries -->
+        <div class="bg-navy-800/60 border border-navy-700 rounded-2xl p-6">
+            <h2 class="text-xl font-semibold mb-6">Recent Entries</h2>
+            <div class="space-y-6 max-h-96 overflow-y-auto pr-2">
+                {% for entry in entries %}
+                <div class="border-l-4 border-indigo-500 pl-5 py-1">
+                    <div class="flex justify-between text-sm text-slate-400">
+                        <span>{{ entry.created_at|date:"d M Y" }}</span>
+                        <span>{{ entry.emotion }}</span>
+                    </div>
+                    <p class="mt-1 text-slate-300">
+                        {{ entry.agent_summary|truncatewords:35|default:"No summary available" }}
+                    </p>
+                </div>
+                {% empty %}
+                <p class="text-slate-500 text-center py-8">No journal entries yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+{{ emotion_counts|json_script:"journal-emotion-stats" }}
+{{ daily_data|json_script:"daily-json" }}
+
+<script>
+(function () {
+
+    const statsEl = document.getElementById('journal-emotion-stats');
+    const canvas  = document.getElementById('journalEmotionChart');
+    const msgEl   = document.getElementById('no-journal-data');
+
+    if (!statsEl || !canvas) return;
+
+    // Prevent double execution
+    if (canvas.dataset.rendered === "true") return;
+    canvas.dataset.rendered = "true";
+
+    let emotionData;
+
+    try {
+        emotionData = JSON.parse(statsEl.textContent);
+    } catch (err) {
+        console.error("JSON parse error:", err);
+        if (msgEl) msgEl.classList.remove("hidden");
+        return;
+    }
+
+    if (!Array.isArray(emotionData) || emotionData.length === 0) {
+        if (msgEl) msgEl.classList.remove("hidden");
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: emotionData.map(e => e.emotion),
+            datasets: [{
+                label: 'Occurrences',
+                data: emotionData.map(e => e.count),
+                backgroundColor: '#6366f1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+})();
+</script>
+
+{% endblock %}

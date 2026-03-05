@@ -1,0 +1,76 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}Results — {{ session.file_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white">{{ prediction.emotion }}</h1>
+            <p class="text-slate-400 mt-1">{{ session.file_name }} • {{ session.created_at|date:"d M Y H:i" }}</p>
+        </div>
+        <a href="{% url 'chat' session.id %}" class="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-lg font-medium transition">
+            Continue in Chat →
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-navy-800/70 border border-navy-700 rounded-2xl p-8">
+            <h2 class="text-2xl font-semibold mb-8">Emotional Dimensions</h2>
+            <div class="grid grid-cols-3 gap-6 text-center">
+                <div>
+                    <div class="text-5xl font-bold mb-2 {% if prediction.valence == 'High' %}text-emerald-400{% else %}text-orange-400{% endif %}">{{ prediction.valence }}</div>
+                    <p class="text-slate-400">Valence</p>
+                    <p class="text-sm text-slate-500">conf: {{ prediction.valence_conf|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <div class="text-5xl font-bold mb-2 {% if prediction.arousal == 'High' %}text-rose-400{% else %}text-blue-400{% endif %}">{{ prediction.arousal }}</div>
+                    <p class="text-slate-400">Arousal</p>
+                    <p class="text-sm text-slate-500">conf: {{ prediction.arousal_conf|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <div class="text-5xl font-bold mb-2 {% if prediction.dominance == 'High' %}text-cyan-400{% else %}text-purple-400{% endif %}">{{ prediction.dominance }}</div>
+                    <p class="text-slate-400">Dominance</p>
+                    <p class="text-sm text-slate-500">conf: {{ prediction.dominance_conf|floatformat:2 }}</p>
+                </div>
+            </div>
+
+            <div class="mt-12">
+                <h3 class="text-xl font-semibold mb-4">AI Explanation</h3>
+                <div class="prose prose-invert max-w-none text-slate-300">
+                    {{ prediction.explanation|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            {% if prediction.distress_flag %}
+            <div class="bg-red-950/60 border border-red-800 rounded-2xl p-6">
+                <h3 class="text-xl font-semibold text-red-300 mb-3">⚠️ Distress Signal Detected</h3>
+                <p class="text-red-100/90">Consider relaxation, talking to someone, or professional support if this persists.</p>
+            </div>
+            {% endif %}
+
+            <div class="bg-navy-800/70 border border-navy-700 rounded-2xl p-6">
+                <h3 class="text-xl font-semibold mb-4">Suggested Next Steps</h3>
+                <ul class="space-y-3 text-slate-300">
+                    {% for step in prediction.action_steps %}
+                    <li class="flex items-start gap-3">
+                        <span class="text-indigo-400 mt-1">•</span>
+                        <span>{{ step }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="text-slate-500">No specific actions suggested</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if prediction.meditation %}
+            <div class="bg-purple-950/40 border border-purple-800 rounded-2xl p-6">
+                <h3 class="text-lg font-semibold mb-3">Meditation / Breathing Suggestion</h3>
+                <p class="text-purple-100/90">{{ prediction.meditation }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

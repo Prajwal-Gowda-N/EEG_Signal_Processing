@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NeuroMood — EEG Emotion Insights{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'navy-950': '#0f172a',
+                        'navy-900': '#0e1a38',
+                        'navy-800': '#1e293b',
+                        'navy-700': '#334155',
+                        'indigo-400': '#818cf8',
+                        'indigo-500': '#6366f1',
+                        'indigo-600': '#4f46e5',
+                        'purple-500': '#a855f7',
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-navy-950 text-slate-200 min-h-screen flex flex-col antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-navy-900 border-b border-navy-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl font-bold tracking-tight text-indigo-400">NeuroMood</span>
+                    <span class="text-xs text-slate-500">EEG Emotion Analysis</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="hover:text-indigo-400 transition">Dashboard</a>
+                        <a href="{% url 'upload' %}" class="hover:text-indigo-400 transition">Upload</a>
+                        <a href="{% url 'journal' %}" class="hover:text-indigo-400 transition">Journal</a>
+                        <form method="post" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-slate-400 hover:text-red-400 text-sm transition">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hover:text-indigo-400 transition">Sign in</a>
+                        <a href="{% url 'register' %}" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm font-medium transition">Get Started</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-5xl mx-auto mt-4 px-4">
+        {% for message in messages %}
+        <div class="p-4 mb-3 rounded-lg border-l-4 {% if 'success' in message.tags %}bg-green-950 border-green-600 text-green-200{% elif 'error' in message.tags %}bg-red-950 border-red-600 text-red-200{% else %}bg-navy-800 border-indigo-600{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-navy-900 border-t border-navy-800 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
+            NeuroMood • Experimental EEG Emotion Analysis • Not medical advice • {% now "Y" %}
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

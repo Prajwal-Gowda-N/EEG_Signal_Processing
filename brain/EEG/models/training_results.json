@@ -1,0 +1,53 @@
+{
+  "model": "EEGNet",
+  "dataset": "DREAMER",
+  "sfreq": 128,
+  "n_channels": 14,
+  "channels": [
+    "AF3",
+    "F7",
+    "F3",
+    "FC5",
+    "T7",
+    "P7",
+    "O1",
+    "O2",
+    "P8",
+    "T8",
+    "FC6",
+    "F4",
+    "F8",
+    "AF4"
+  ],
+  "window_sec": 3,
+  "T": 384,
+  "labels": [
+    "Valence",
+    "Arousal",
+    "Dominance"
+  ],
+  "label_map": {
+    "0": "Low",
+    "1": "High"
+  },
+  "results": {
+    "Valence": {
+      "svm_acc_mean": 60.63,
+      "eegnet_acc_mean": 62.32,
+      "eegnet_acc_std": 9.82,
+      "eegnet_f1_mean": 0.4527
+    },
+    "Arousal": {
+      "svm_acc_mean": 56.52,
+      "eegnet_acc_mean": 61.59,
+      "eegnet_acc_std": 9.68,
+      "eegnet_f1_mean": 0.559
+    },
+    "Dominance": {
+      "svm_acc_mean": 52.17,
+      "eegnet_acc_mean": 58.21,
+      "eegnet_acc_std": 8.95,
+      "eegnet_f1_mean": 0.5717
+    }
+  }
+}

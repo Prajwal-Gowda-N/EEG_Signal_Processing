@@ -1,0 +1,38 @@
+{% extends 'eeg_app/base.html' %}
+{% block title %}About NeuroMood{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-white mb-8">About NeuroMood</h1>
+
+    <div class="prose prose-invert max-w-none space-y-6 text-slate-300">
+        <p>NeuroMood is an experimental web application that uses EEG signal processing and AI to estimate emotional states (valence, arousal, dominance, discrete emotions) from brainwave data.</p>
+
+        <h2 class="text-2xl font-semibold mt-12">Important Disclaimer</h2>
+        <p class="text-amber-300 font-medium">
+            This tool is <strong>not</strong> a medical device, diagnostic tool, or substitute for professional mental health care.
+            Results are estimates only and should not be used for clinical decisions.
+        </p>
+
+        <h2 class="text-2xl font-semibold mt-10">How it works (high-level)</h2>
+        <ul class="list-disc pl-6 space-y-2">
+            <li>Upload cleaned EEG data (.csv / .txt / .npy)</li>
+            <li>Preprocessed features → deep learning model predicts emotion dimensions</li>
+            <li>RAG-enhanced LLM generates explanation, action steps & follow-up questions</li>
+            <li>Chat interface allows you to ask more specific questions about your session</li>
+        </ul>
+
+        <h2 class="text-2xl font-semibold mt-10">Technology stack</h2>
+        <ul class="list-disc pl-6 space-y-1">
+            <li>Django (backend)</li>
+            <li>Tailwind CSS + HTMX + Alpine.js (frontend)</li>
+            <li>Chart.js (visualizations)</li>
+            <li>Custom emotion inference model + LLM agent (RAG)</li>
+        </ul>
+
+        <p class="mt-12 text-slate-400 text-sm">
+            Built as an experimental side project • 2024–2025
+        </p>
+    </div>
+</div>
+{% endblock %}
